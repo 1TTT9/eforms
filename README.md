@@ -1,5 +1,5 @@
 # eforms
-========
+
 
 Simple Approval check system (Complex Chinese)
 
@@ -10,7 +10,7 @@ My first try to implement a simple and easy-to-use approval checker system with 
 
 Installation guide:
 1. ceate virtual environment for developement
-> environment [MY_PROJECT]
+> virtualenv [MY_PROJECT]
 2. activate virtual env
 > soruce ./sy_viewflow/bin/activate
 3. install all dependencies

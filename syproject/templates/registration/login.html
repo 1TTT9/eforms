@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %} <title>測試 - workorder</title> {% endblock %}
+
+{% block breadcrumb %}
+{% endblock %}
+
+{% block main_content %}
+  <div class="loginmodal-container">
+    <h1>工單系統</h1><br>
+    {{ form.non_field_errors }}          
+    <form method="post" action=".">
+      {% csrf_token %}       
+    <input type="text" name="user" placeholder="帳戶">
+    <input type="password" name="pass" placeholder="密碼">
+    <input type="submit" name="login" class="login loginmodal-submit" value="登入">
+    </form>    
+  </div>
+
+{% endblock %}

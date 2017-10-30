@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %} <title>測試 - MENU</title> {% endblock %}
+{% block breadcrumb %}
+<ol class="breadcrumb">
+	<li class="active"><a href="menu/">menu</a></li>
+</ol>
+{% endblock %}
+{% block main_content %}
+<ul>
+<table class="table">
+    <thead>
+        <th>name</th>
+        <th>price</th>
+        <th>comment</th>
+        <th>ishot</th>        
+    </thead>
+    <tbody>
+		{% for food in foods %}
+	    <tr>
+	        <td> {{ food.name }} </td>
+	        <td> {{ food.price }} </td>
+	        <td> {{ food.comment }} </td>
+	        <td> {{ food.is_spicy }} </td>        
+	    </tr>
+	    {% empty %}
+	    <tr>
+	        <td colspan="4">No items in shipment</td>
+	    </tr>
+	    {% endfor %}
+	</tbody>
+</table>
+</ul>
+{% endblock %}

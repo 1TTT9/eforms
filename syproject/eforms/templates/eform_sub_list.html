@@ -1,0 +1,186 @@
+<tr class="active">
+	<td>
+		<button class="btn btn-default btn-xs" type="button" data-toggle="collapse" data-target="#{{efm_req.code}}">
+			展開 <span class="badge">{{ efm_req.task_size }}</span>
+		</button>
+	</td>
+	<td>{{efm_req.pid}}</td>
+	<td>{{efm_req.pname}}</td>
+</tr>    	
+{% if efm_req.tasks %}
+<tr id="{{efm_req.code}}" class="{% if not collapsed %}collapse{% endif %}">
+	<td colspan="11">
+		<div class="bs-example">
+			<ul class="pagination pagination-sm">
+			    <li><a name="tablelist" rel="{{efm_req.pid}}-4" class="btn btn-xs">全部<span class="badge">{{ efm_req.task_size }}</span></a></li>
+			    <li><a name="tablelist" rel="{{efm_req.pid}}-0" class="btn btn-xs">{{review_state.0.val}}<span class="badge">{{ efm_req.task_undo_size }}</span></a></li>
+			    <li><a name="tablelist" rel="{{efm_req.pid}}-1"  class="btn btn-xs">{{review_state.1.val}}<span class="badge">{{ efm_req.task_done_size }}</span></a></li>
+			</ul>	
+		</div>		
+
+	    <table id="table-{{efm_req.pid}}"  class="table table-condensed">
+			<tr>
+				<th >編號</th>
+				<th>工代</th>
+				<th style="display:none;">狀態</th>
+				<th {% if block_num == 0 %} style="display:none;" {% endif %}>創建者</th>
+				<th>主管</th>
+				<th>特助</th>
+				<th>總經理</th>
+				<th>董事</th>
+				<th>建立時間</th>
+				<th>更新時間</th>
+				<th></th>
+		    </tr>
+		    {% for task in efm_req.tasks %}
+			<tr id="formitem-{{efm_req.code}}-{{task.id}}">
+				<td rel='{{task.id}}'>{{task.td_num}}</td>
+				<td>{{task.project_code}}</td>
+				{% for r in form_state %}
+				{% if r.id == task.status %}
+				<td style="display:none;" id="formstate-{{efm_req.code}}-{{task.id}}">{{r.val}}</td>
+				{% endif %}
+				{% endfor %}
+				<td {% if block_num == 0 %} style="display:none;" {% endif %}>{{task.creator}}</td>
+				<td id="actstate-{{efm_req.code}}-{{task.id}}-1">
+				{% if task.act_01 == 0 %}
+				 <a rel="0" class="btn btn-xs btn-secondary disabled"><i class="glyphicon glyphicon-time"></i></a>
+				{% elif task.act_01 == 1 %}
+				 <a rel="1" class="btn btn-xs btn-success disabled"><i class="glyphicon glyphicon-ok"></i></a>
+				{% else %}
+				 <a rel="1" class="btn btn-xs btn-danger disabled"><i class="glyphicon glyphicon-remove"></i></a>	
+				{% endif %}
+				</td><td id="actstate-{{efm_req.code}}-{{task.id}}-2">
+				{% if task.act_02 == 0 %}
+				 <a rel="0" class="btn btn-xs btn-secondary disabled"><i class="glyphicon glyphicon-time"></i></a>
+				{% elif task.act_02 == 1 %}
+				 <a rel="1" class="btn btn-xs btn-success disabled"><i class="glyphicon glyphicon-ok"></i></a>					
+				{% else %}
+				 <a rel="1" class="btn btn-xs btn-danger disabled"><i class="glyphicon glyphicon-remove"></i></a>
+				{% endif %}
+				</td><td id="actstate-{{efm_req.code}}-{{task.id}}-3">					
+				{% if task.act_03 == 0 %}
+				 <a rel="0" class="btn btn-xs btn-secondary disabled"><i class="glyphicon glyphicon-time"></i></a>
+				{% elif task.act_03 == 1 %}
+				 <a rel="1" class="btn btn-xs btn-success disabled"><i class="glyphicon glyphicon-ok"></i></a>					
+				{% else %}
+				 <a rel="1" class="btn btn-xs btn-danger disabled"><i class="glyphicon glyphicon-remove"></i></a>
+				{% endif %}
+				</td><td id="actstate-{{efm_req.code}}-{{task.id}}-4">
+				{% if task.act_04 == 0 %}
+				 <a rel="0" class="btn btn-xs btn-secondary disabled"><i class="glyphicon glyphicon-time"></i></a>
+				{% elif task.act_04 == 1 %}
+				 <a rel="1" class="btn btn-xs btn-success disabled"><i class="glyphicon glyphicon-ok"></i></a>					
+				{% else %}
+				 <a rel="1" class="btn btn-xs btn-danger disabled"><i class="glyphicon glyphicon-remove"></i></a>					
+				{% endif %}
+				</td>
+				<td>{{task.creation_date}}</td>
+				<td>{{task.last_updated}}</td>
+				<td>
+				<div class="pull-right">
+					{% if cans.can_edit_activity %} 
+					<a class="btn btn-info btn-xs" href="{% url 'edit' efm_req.pid task.id %}"><i class="glyphicon glyphicon glyphicon-pencil"></i> 編輯</a>
+					{% endif %}
+					{% if cans.can_edit_activity %}
+					<a class="btn btn-danger btn-xs" id="delete-{{efm_req.code}}-{{task.id}}"><i class="glyphicon glyphicon glyphicon-trash"></i> 刪除</a>	
+					{% endif %}
+					{% if cans.can_approve_activity %}
+					<a class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal" id="review-{{efm_req.code}}-{{task.id}}" {% if not task.can_approve2_activity %} disabled {% endif %}><i class="glyphicon glyphicon glyphicon-user"></i> 审批</a>
+					{% endif %}
+					{% if cans.can_account_activity %}
+					<a class="btn btn-warning btn-xs" id="account-{{efm_req.code}}-{{task.id}}" {% if not task.can_approve2_activity %} disabled {% endif %}><i class="glyphicon glyphicon glyphicon-euro"></i> 會計</a>
+					{% endif %}
+					<a class="btn btn-default btn-xs {% if not task.can_view_activity %} disabled {% endif %}" data-toggle="modal" data-target="#myModal" id = "view-{{efm_req.code}}-{{task.id}}"><i class="glyphicon glyphicon glyphicon-search"></i> 檢視</a>
+				</div>
+				<script>
+					$("#delete-{{efm_req.code}}-{{task.id}}").on('click',function() {
+						var confirm_dialog = "確定刪除此申請 ({{efm_req.pid}}-{{task.id}}) ?";
+						if (confirm(confirm_dialog))
+						{
+							$.get('/eforms/{{efm_req.pid}}/Delete/{{task.id}}', function(){}).done(function(data){
+								$("#formitem-{{efm_req.code}}-{{task.id}}").remove();
+								console.log("yes --- " +data);
+							});
+							console.log("yes");
+						} 
+						else {	console.log("no");	}
+					});
+
+					$("#review-{{efm_req.code}}-{{task.id}}").on('click',function() {
+						$(".modal-content .modal-body").show();
+						$(".modal-content .modal-footer").show();			
+
+						$("#myModalLabel").text("审批申請 編號: {{efm_req.pid}}-{{task.id}}");
+
+						$("input[name=taskid]").val("{{task.id}}");
+						$("input[name=requestpid]").val("{{efm_req.pid}}");
+						$("input[name=requestcode]").val("{{efm_req.code}}");			
+						
+						var cs = $("#actstate-{{efm_req.code}}-{{task.id}}-{{block_num}} a").attr('class');
+						if (cs.indexOf("btn-secondary") >= 0)
+							$("#review-form").val("{{review_state.0.id}}").change();
+
+						else if (cs.indexOf("btn-success") >= 0)
+							$("#review-form").val("{{review_state.1.id}}").change();
+
+						else
+							$("#review-form").val("{{review_state.2.id}}").change();				
+						
+						$("#comment").val('');
+						$.get('/eforms/{{efm_req.pid}}/ViewReview/{{task.id}}', function(data){
+							$("#testTable").html(data);				
+						});
+					});	
+					
+
+					$("#view-{{efm_req.code}}-{{task.id}}").on('click',function() {
+						//console.log($("#view-{{efm_req.code}}-{{task.id}}"));
+						$(".modal-content .modal-body").hide();
+						$(".modal-content .modal-footer").hide();			
+
+						$("#comment").val('');
+						$.get('/eforms/{{efm_req.pid}}/ViewBasic/{{task.id}}', function(data){
+							$("#testTable").html(data);				
+						});
+					});
+
+					var tval2 = "{{form_state.2.val}}", tval4 = "{{form_state.4.val}}";
+					$('#account-{{efm_req.code}}-{{task.id}}').on('click', function(){
+						var myclass = $('#formstate-{{efm_req.code}}-{{task.id}}');
+						var opt = "{{form_state.4.id}}";
+						if ($(myclass).text() == tval4)
+						{				
+							$(myclass).text(tval2);
+							opt = "{{form_state.2.id}}";
+						}
+						else
+							$(myclass).text(tval4);
+
+						$.get('/eforms/{{efm_req.pid}}/Approve/{{task.id}}', {"opt":opt}).done(function(data){
+							console.log("approve succeed");
+						});
+					});
+
+				</script>
+				</td>
+		    </tr>
+		    {% endfor %}
+		    <tr>
+		    	<td colspan="11">
+		    	<div>
+		    		<input type="text" class="pull-right" size="1" name="{{efm_req.pid}}-page" value="{{page}}"></input>
+					<ul class="pagination pagination-sm pull-right bs-example2">
+					    <li><a rel="{{efm_req.pid}}-0" name="request-pagination" class="btn btn-xs">&laquo;</a></li>
+					    <li><a rel="{{efm_req.pid}}-1" name="request-pagination" class="btn btn-xs">前一頁</a></li>
+					    <li><a rel="{{efm_req.pid}}-2" name="request-pagination" class="btn btn-xs">下一頁</a></li>
+					    <li><a rel="{{efm_req.pid}}-3" name="request-pagination" class="btn btn-xs">&raquo;</a></li>
+					</ul>
+				</div>
+		    	</td>
+		    </tr>
+		</table>
+	</td>
+</tr>
+{% endif %}
+

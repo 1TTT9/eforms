@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %} <title>測試 - MENU</title> {% endblock %}
+{% block breadcrumb %}
+<ol class="breadcrumb">
+  <li><a href="/">Home</a></li>
+  <li class="active">{{page_title}}</li>
+</ol>
+{% endblock %}
+{% block main_content %}
+<ul>
+<table class="table">
+    <thead>
+        <th>項目</th>
+        <th>內容</th>
+    </thead>
+    <tbody>
+		{% for request in requests %}
+	    <tr>
+	        <td> 工代 </td>
+	        <td> {{ request.project_code }} </td>
+	    </tr>
+	    <tr>
+	        <td> 創建者 </td>
+	        <td> {{ request.creator }} </td>
+	    </tr>
+	    <tr>
+	        <td> 創建日期 </td>
+	        <td> {{ request.creation_date }} </td>
+
+	    </tr>
+	    <tr>
+	        <td> 狀態 </td>
+	        <td> {{ request.status }} </td>
+
+	    </tr>	    	    	    
+	    {% endfor %}
+	</tbody>
+</table>
+</ul>
+{% endblock %}

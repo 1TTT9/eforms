@@ -14,6 +14,7 @@ celery==4.1.0
 certifi==2017.07.27.1
 django-extensions==1.9.1
 django-filer==1.2.8
+django-form-utils==1.0.3
 django-money==0.11.4
 django-mptt==0.8.7
 django-polymorphic==1.1b2

@@ -1,7 +1,7 @@
 <tr class="active">
 	<td>
 		<button class="btn btn-default btn-xs" type="button" data-toggle="collapse" data-target="#{{efm_req.code}}">
-			展開 <span class="badge">{{ efm_req.task_size }}</span>
+			展開 <span class="badge">{{ efm_req.num_requests }}</span>
 		</button>
 	</td>
 	<td>{{efm_req.pid}}</td>
@@ -24,10 +24,10 @@
 				<th>工代</th>
 				<th style="display:none;">狀態</th>
 				<th {% if block_num == 0 %} style="display:none;" {% endif %}>創建者</th>
-				<th>主管</th>
-				<th>特助</th>
-				<th>總經理</th>
-				<th>董事</th>
+				<th>{{efm_req.pu.0}}</th>
+				<th>{{efm_req.pu.1}}</th>
+				<th>{{efm_req.pu.2}}</th>
+				<th>{{efm_req.pu.3}}</th>
 				<th>建立時間</th>
 				<th>更新時間</th>
 				<th></th>

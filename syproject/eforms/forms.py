@@ -2,7 +2,12 @@
 
 from django import forms
 
-from .models import EFMRequest03, EReview, get_erequest_detail_by_pk
+from .models import (
+	EFMRequest03, EReview, 
+	EFMRequest06,
+	get_erequest_detail_by_pk)
+
+from constants import *
 
 
 
@@ -82,6 +87,65 @@ class TestForm_EFMRequest03(forms.ModelForm):
 		}
 
 
+class TestForm_EFMRequest06(forms.ModelForm):
+	
+	project_code = forms.CharField(error_messages={'required':
+		u'{0} 欄不得為空'.format(unicode(EFMRequest03._meta.get_field('project_code').verbose_name))}, 
+		widget=forms.TextInput(attrs={'class': "form-control"}), 
+		label=unicode(EFMRequest03._meta.get_field('project_code').verbose_name))
+
+	department = forms.CharField(error_messages={'required':
+		u'{0} 欄不得為空'.format(unicode(EFMRequest03._meta.get_field('department').verbose_name))}, 	 
+		widget=forms.TextInput(attrs={'class': "form-control"}), 
+		label=unicode(EFMRequest03._meta.get_field('department').verbose_name))
+
+
+	"""
+	def __init__(self, *args, **kwargs):
+		super(TestForm_EFMRequest06, self).__init__(*args, **kwargs)
+		for x in range(10):
+			file = {
+				'cost_{0}'.format(x) : forms.DecimalField(
+					#error_messages={'required': u'{0} 欄不得為空'.format(EFMRequest06.proof_cost)},
+					#widget=forms.NumberInput(attrs={'style': 'width:12ch',}),
+					widget=forms.NumberInput(attrs={'class': 'form-control'}),					
+					label=NemasEFMRequest06.proof_cost,
+					max_digits=10,
+					decimal_places=2)
+				,
+    			'file_{0}'.format(x) : forms.FileField(
+					label=NemasEFMRequest06.proof_file,
+
+					widget=forms.ClearableFileInput(
+						attrs={'multiple': False}))
+    			,
+				'desp_{0}'.format(x) : forms.CharField(
+					#error_messages={'required': u'{0} 欄不得為空'.format(EFMRequest06.proof_description)}, 
+					widget=forms.Textarea(attrs={'class':'form-control', 'rows':4, 'cols':50}), 
+					label=NemasEFMRequest06.proof_description)
+			}
+			self.fields.update(file)
+	"""
+	class Meta:
+		model = EFMRequest06
+		field_args = {
+            "first_name" : {
+                "error_messages" : {
+                    "required" : "此欄不得為空!"
+                }
+            }
+        }
+
+		#fields = ('title', 'description',)
+		fields = '__all__'
+		exclude = [
+			'title', 'description',
+			'creator', 'review', 'creation_date', 'last_updated'
+		]
+		widgets = {          
+		}
+
+
 class TestForm_Review(forms.ModelForm):
 
 	class Meta:
@@ -105,7 +169,7 @@ class TestForm_Review(forms.ModelForm):
 
 def get_form_by_efmid(efmid, tk = None, post_data = None):
 
-	if efmid == '3':
+	if efmid == NemasEFMRequest03.EFMID:
 		"""
 		if tk is None:
 			if post_data is None:
@@ -121,4 +185,11 @@ def get_form_by_efmid(efmid, tk = None, post_data = None):
 		return TestForm_EFMRequest03(
 			post_data or None, 
 			instance = [None if tk is None else get_erequest_detail_by_pk(efmid, tk)][0])
-	return None
+
+	elif efmid == NemasEFMRequest06.EFMID:
+		return TestForm_EFMRequest06(
+			post_data or None, 
+			instance = [None if tk is None else get_erequest_detail_by_pk(efmid, tk)][0])		
+
+	else:
+		return None

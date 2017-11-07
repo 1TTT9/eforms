@@ -1,6 +1,7 @@
 #-*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
+
+import os
 
 
 from django.utils import timezone
@@ -10,12 +11,16 @@ from django.db import models
 #from account.models import User
 from django.contrib.auth.models import User
 
-from constants import (
-    FORM_LIST, STATE_LIST, ACT_LIST, PURPOSE_LIST, PAYWAY_LIST, Nemas)
+from constants import *
 
 from filer.fields.image import FilerImageField
 #from filer.fields.file import FilerFileField
 
+from django.conf import settings
+
+
+from django.core.files import File
+from filer.models import Image
 
 from uuid import uuid4 as UUID
 
@@ -60,33 +65,6 @@ class AbstractEntity(models.Model):
         return str(self.id)
 
 
-class NemasEFMRequest03:
-
-    title =  u'标题' 
-    description =  u'描述'   
-
-    project_code =  u'工代' 
-    department   = u'部門'
-    creator = u'创建者'
-    review = u'審查'
-    creation_date = u'創建日期'
-    last_updated  = u'上次更新' 
-
-    adv_payment = u'請款金額'
-    purpose = u'用途'
-    method = u'付款方式'
-    adv_paydate =  u'付款日期'
-
-    receiver_name = u'姓名/公司名稱'
-    receiver_account = u'帳號'
-    receiver_bank = u'開戶行地址'
-
-
-    unknown_01 = u'實收金額'
-    unknown_02 = u'報銷日期'
-    unknown_03 = u'報銷抵銷金額'
-    unknown_04 = u'歸還金額'
-
 
 class EFMRequest03(models.Model):
 
@@ -123,12 +101,13 @@ class EFMRequest03(models.Model):
     def __unicode__(self):
         return self.id
 
-class SubEFM06(models.Model):
+
+class EFMProof06(models.Model):
 
     efm06 = models.ForeignKey('EFMRequest06', verbose_name=u'費用報銷單', null=True)
-    description = models.TextField(u'摘要', blank=True, max_length=100)
-    cost = models.FloatField(default=0.0)
-    proof = FilerImageField(null=True, blank=True)
+    description = models.TextField(verbose_name= NemasEFMRequest06.proof_description, blank=True, max_length=100)
+    cost = models.FloatField(verbose_name= NemasEFMRequest06.proof_cost, default=0.0)
+    proof = FilerImageField(verbose_name= NemasEFMRequest06.proof_file, null=True, blank=True)
 
     class Meta:
         verbose_name = u'明細'
@@ -149,30 +128,13 @@ class EFMRequest06(models.Model):
     last_updated  = models.DateTimeField(u'上次更新', auto_now=True) 
 
     class Meta:
-        verbose_name = u'抬頭'
+        verbose_name = u'報銷單'
         verbose_name_plural = verbose_name
         ordering = ['id']
 
 
     def __unicode__(self):
-        return self.project_code
-
-
-class NemasEReview:
-    title = u'标题'
-    description = u'描述'
-
-    status = u'状态'
-
-    opinion = u'审批意见'
-
-    act = u'状态'
-
-    rep_time = u'回覆时间'
-
-    create_time = u'创建时间'
-    expire_time = u'期望时间'
-    finish_time = u'完成时间'
+        return self.id
 
 
 class EReview(models.Model):
@@ -216,9 +178,9 @@ class EReview(models.Model):
         return str(self.id)
 
 
-def init_erequest_by_efmid(efmid, fo, creator):
+def init_erequest_by_efmid(efmid, fo, creator, http_request=None):
 
-    if efmid == '3':
+    if efmid == NemasEFMRequest03.EFMID:
         r = EReview(status='1')
         r.save()
         f= EFMRequest03(
@@ -244,12 +206,57 @@ def init_erequest_by_efmid(efmid, fo, creator):
         )
         f.save()
         return f
+    elif efmid == NemasEFMRequest06.EFMID:
+
+        #print http_request.POST.keys()
+        #for ff in http_request.FILES.keys():
+        #    print ff, http_request.FILES[ff].name
+
+        fids = []
+        for k in http_request.POST.keys():
+            if k.startswith('cost'):
+                fid = k[k.find('_')+1:]
+                if fid not in fids:
+                    fids.append(fid)
+
+        for fid in fids:
+            filename = http_request.FILES[unicode('file_'+fid)].name
+            filepath = os.path.join(settings.MEDIA_ROOT, filename)
+
+            if not os.path.exists(filepath):
+                with open(filepath, 'wb') as fd:
+                    fd.write(http_request.FILES[unicode('file_'+fid)].read())
+
+        r = EReview(status='1')
+        r.save()    
+        f = EFMRequest06(
+            project_code=fo.cleaned_data['project_code'],
+            department=fo.cleaned_data['department'],
+            creator=creator,
+            review=r
+        )
+        f.save()
+        for fid in fids:
+            filename = http_request.FILES[unicode('file_'+fid)].name
+            filepath = os.path.join(settings.MEDIA_ROOT, filename)
+            with open(filepath, "rb") as fd:
+                file_obj = File(fd, name=filename)
+                image = Image.objects.create(owner=creator,
+                                 original_filename=filename,
+                                 file=file_obj)
+
+                p = EFMProof06(efm06=f,
+                    description=http_request.POST[unicode('desp_'+fid)],
+                    cost=http_request.POST[unicode('cost_'+fid)],
+                    proof=image)
+                p.save()
+        return f
     else:
         return None
     
 def update_erequest_by_efmid(efmid, tk, fo):
 
-    if efmid == '3':
+    if efmid == NemasEFMRequest03.EFMID:
         f = get_erequest_detail_by_pk(efmid, tk)
         f.project_code=fo.cleaned_data['project_code']
         f.department=fo.cleaned_data['department']
@@ -269,76 +276,75 @@ def update_erequest_by_efmid(efmid, tk, fo):
         f.unknown_04=fo.cleaned_data['unknown_04']
         f.save()
         return f
-
-    else:
-        return None
+    elif efmid == NemasEFMRequest06.EFMID:
+        return f
 
 
 def update_erequest_review_by_efmid(efmid, pid, man, opt, comment):
 
-    if efmid == '3':
+    if efmid == NemasEFMRequest03.EFMID:
         e = EFMRequest03.objects.get(id=pid)
-        r = e.review
-        t =  timezone.now()
+    elif efmid == NemasEFMRequest06.EFMID:
+        e = EFMRequest06.objects.get(id=pid)
 
-        if opt == ACT_LIST[2][0]:
-            r.status = STATE_LIST[3][0]
-        elif opt == ACT_LIST[1][0] and man not in [Nemas.vp, Nemas.accounting]:
-            r.status = STATE_LIST[1][0]
+    r = e.review
+    t =  timezone.now()
+
+    if opt == ACT_LIST[2][0]:
+        r.status = STATE_LIST[3][0]
+    elif opt == ACT_LIST[1][0] and man not in [NemasPU.vp.name, NemasPU.accounting.name]:
+        r.status = STATE_LIST[1][0]
+
+    if man == NemasPU.supervisor.name:
+        r.act_01 = opt
+        r.opinion_01 = comment
+        r.rep_time_01 =t
+
+        r.act_02 = "0"
+        r.rep_time_02 = t
+
+    elif man == NemasPU.ma.name:
+        r.act_02 = opt
+        r.opinion_02 = comment
+        r.rep_time_02 = t
+
+        r.act_03 = "0"
+        r.rep_time_03 = t
+
+    elif man == NemasPU.manager.name:
+        r.act_03 = opt
+        r.opinion_03 = comment
+        r.rep_time_03 = t 
+
+        r.act_04 = "0"
+        r.rep_time_04 = t 
+
+    elif man == NemasPU.vp.name:
+        r.act_04 = opt
+        r.opinion_04 = comment
+        r.rep_time_04 = t 
+
+        if opt == ACT_LIST[1][0]:
+            r.status = STATE_LIST[2][0]
+
+        r.act_05 = "0"
+        r.rep_time_05 = t 
+
+    elif man == NemasPU.accounting.name:
+        #r.act_05 = opt
+        #r.opinion_05 = comment
+        r.rep_time_05 = t 
+
+        r.status = opt
 
 
-        if man == Nemas.supervisor:
-            r.act_01 = opt
-            r.opinion_01 = comment
-            r.rep_time_01 =t
-
-            r.act_02 = "0"
-            r.rep_time_02 = t
-
-        elif man == Nemas.ma:
-            r.act_02 = opt
-            r.opinion_02 = comment
-            r.rep_time_02 = t
-
-            r.act_03 = "0"
-            r.rep_time_03 = t
-
-        elif man == Nemas.manager:
-            r.act_03 = opt
-            r.opinion_03 = comment
-            r.rep_time_03 = t 
-
-            r.act_04 = "0"
-            r.rep_time_04 = t 
-
-        elif man == Nemas.vp:
-            r.act_04 = opt
-            r.opinion_04 = comment
-            r.rep_time_04 = t 
-
-            if opt == ACT_LIST[1][0]:
-                r.status = STATE_LIST[2][0]
-
-            r.act_05 = "0"
-            r.rep_time_05 = t 
-
-        elif man == Nemas.accounting:
-            #r.act_05 = opt
-            #r.opinion_05 = comment
-            r.rep_time_05 = t 
-
-            r.status = opt
-
-
-        r.save()
-        return e, t
-    else:
-        return None
+    r.save()
+    return e, t
 
 
 def delete_erequest_object_by_pk(efmid, pid):
 
-    if efmid == '3':
+    if efmid == NemasEFMRequest03.EFMID:
         e = EFMRequest03.objects.get(id=pid)
         e.review.delete()
         return e.delete()
@@ -346,27 +352,43 @@ def delete_erequest_object_by_pk(efmid, pid):
         return None
 
 
-
 def get_erequest_detail_by_pk(efmid, pid):
 
-    if efmid == '3':
-        return EFMRequest03.objects.get(id=pid)
-    else:
-        return None
+    requestObj = None
+    if efmid == NemasEFMRequest03.EFMID:
+        requestObj = EFMRequest03
+    elif efmid == NemasEFMRequest06.EFMID:
+        requestObj = EFMRequest06
+
+    return requestObj.objects.get(id=pid)
 
 
 def get_erequests_by_efmid(efmid=''):
 
-    if efmid == '3':
-        ss =  EFMRequest03.objects.all()
-        return ss
+    if efmid == NemasEFMRequest03.EFMID:
+        return  EFMRequest03.objects.all()
 
-
-    elif efmid == '6':
+    elif efmid == NemasEFMRequest06.EFMID:
         return EFMRequest06.objects.all()
-    return ERequest.objects.all()
-    """
-    if len(filtered_name)==0:
+
+    else:
         return ERequest.objects.all()
-    return ERequest.objects.filter(efmid=filtered_name)
-    """
+
+
+def get_erequests_by_creator(efmid='', creator=''):
+
+    if efmid == NemasEFMRequest03.EFMID:
+        return EFMRequest03.objects.filter(creator=creator)
+
+    elif efmid == NemasEFMRequest06.EFMID:
+        return EFMRequest06.objects.filter(creator=creator)
+
+    else:
+        return ERequest.objects.all()    
+
+def get_proofs_detail_by_pk(efmid, fo):
+
+    if efmid == NemasEFMRequest06.EFMID:
+        return EFMProof06.objects.filter(efm06=fo)
+    else:
+        return None

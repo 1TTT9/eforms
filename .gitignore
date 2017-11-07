@@ -41,4 +41,6 @@ nosetests.xml
 #MMM
 syproject/eforms/templates/eform_list.html
 syproject/eforms/templates/eform_detail_0.html
-syproject/eforms/static/
+syproject/eforms/static
+syproject/eforms/migrations
+syproject/settings.py

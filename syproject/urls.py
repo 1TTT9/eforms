@@ -16,9 +16,12 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 from eforms.views import (
-    test_menu, homepage, list_eform, update_list_eform,
+    test_menu, homepage, list_eform,
     CreateEFormActivity, 
     ViewEFormActivity, 
     ApproveEFormActivity, 
@@ -39,8 +42,9 @@ urlpatterns = [
     #url(r'^eforms/([0-9]{1})/Create/$', CreateEFormActivity.as_view(), name="create"),    
     url(r'^eforms/(?P<pk>[0-9]+)/Create/$', CreateEFormActivity.as_view(), name="create"),
 
-    url(r'^eforms/UpdateRequest$', update_list_eform, name="update_request"),    
+    #url(r'^eforms/UpdateRequest$', update_list_eform, name="update_request"),    
 
+    url(r'^eforms/UpdateRequest$', list_eform, name="update_request"),    
     url(r'^eforms/$', list_eform),
 
     url(r'^eforms/(?P<pk>[0-9]+)/View/(?P<tk>\d+)$', ViewEFormActivity.as_view(), name="view"),
@@ -59,8 +63,11 @@ urlpatterns = [
     #url(r'auth/', include('django.contrib.auth.urls')),
     url(r'^accounts/login/$',  login), url(r'^accounts/logout/$', logout),        
     #url(r'^accounts/login/$',  auth.login), url(r'^accounts/logout/$', auth.logout),    
-    #url(r'^index/$',list_eform),    
-    url(r'^',homepage),        
-
-
+    #url(r'^index/$',list_eform),       
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+urlpatterns += [url(r'^',homepage)]     
+

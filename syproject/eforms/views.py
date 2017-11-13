@@ -104,11 +104,9 @@ def list_eform(request, *args, **kwargs):
             block_num = p.block_num
             break
 
-    username = _get_username_cn(request.user.username)#_get_username(request)
-
-    can_account = request.user.username == NemasPU.accounting.name #PRIVILUSER[0]['name']
-    is_admin = request.user.username == NemasPU.admin.name #PRIVILUSER[5]['name']
-
+    username = _get_username_cn(request.user.username)
+    can_account = request.user.username == NemasPU.accounting.name 
+    is_admin = request.user.username == NemasPU.admin.name
     cans =  {
         'can_edit_activity': is_admin,
         'can_approve_activity': can_approve,
@@ -340,6 +338,134 @@ def parseUTF8(s):
     return [s.encode('utf-8') if isinstance(s, unicode) else s][0]    
 
 
+def addHTMLTableBody(innerHTMList, form, kwargs):
+    if kwargs['pk'] == NemasEFMRequest03.EFMID:
+        innerHTMList.append('<tr><th scope="row" rowspan="3">{0}</th><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td></tr>'.format(
+            parseUTF8(NemasEFMRequest03.creator),
+            "姓名",
+            parseUTF8(form.creator.last_name),
+            parseUTF8(NemasEFMRequest03.creation_date),
+            parseUTF8(GetLocalTime(form.creation_date))
+        ))
+
+        innerHTMList.append('<tr><th scope="row">{0}</th><td>{1}</td><td>{2}</td><td>{3}</td></tr>'.format(
+            parseUTF8(NemasEFMRequest03.department),
+            parseUTF8(form.department),
+            parseUTF8(NemasEFMRequest03.adv_paydate),            
+            ["" if form.adv_paydate in [None, ""] else GetLocalDate(form.adv_paydate) ][0]
+        ))
+
+        innerHTMList.append('<tr><td>{0}</td><td colspan="3">{1}</td></tr>'.format(
+            parseUTF8(NemasEFMRequest03.project_code),
+            parseUTF8(form.project_code),
+        ))                
+
+        innerHTMList.append('<tr><th scope="row" rowspan="3">{0}</th><td>{1}</td><td colspan="3">{2}</td></tr>'.format(
+            "收款人/單位",
+            parseUTF8(NemasEFMRequest03.receiver_name),
+            parseUTF8(form.receiver_name),
+        ))
+
+        innerHTMList.append('<tr><td>{0}</td><td colspan="3">{1}</td></tr>'.format(
+            parseUTF8(NemasEFMRequest03.receiver_account),
+            parseUTF8(form.receiver_account),
+        ))                     
+
+        innerHTMList.append('<tr><td>{0}</td><td colspan="3">{1}</td></tr>'.format(
+            parseUTF8(NemasEFMRequest03.receiver_bank),
+            parseUTF8(form.receiver_bank),
+        ))                     
+
+        innerHTMList.append('<tr><th scope="row">{0}</th><td colspan="4">{1}</td></tr>'.format(
+            parseUTF8(NemasEFMRequest03.adv_payment),
+            parseUTF8(form.adv_payment),
+        ))                     
+
+        innerHTMList.append('<tr><th scope="row">{0}</th><td colspan="2">{1}</td><th scope="row">{2}</th><td>{3}</td></tr>'.format(
+            parseUTF8(NemasEFMRequest03.purpose),
+            parseUTF8(PURPOSE_LIST[int(form.purpose)][1]),
+            parseUTF8(NemasEFMRequest03.method),
+            parseUTF8(PAYWAY_LIST[int(form.method)][1]),            
+        ))
+
+    elif kwargs['pk'] == NemasEFMRequest05.EFMID:
+        innerHTMList.append('<tr><th scope="row">{0}</th><td colspan="2">{1}</td><th>{2}</th><td>{3}</td><th>{4}</th><td>{5}</td></tr>'.format(
+            parseUTF8(NemasEFMRequest05.creation_date),
+            parseUTF8(GetLocalTime(form.creation_date)),
+            parseUTF8(NemasEFMRequest05.project_code),
+            parseUTF8(form.project_code),
+            parseUTF8(NemasEFMRequest05.car_plate),
+            parseUTF8(form.car_plate),
+        ))
+            
+        innerHTMList.append('<tr><th scope="row">{0}</th><td colspan="2">{1}</td><th>{2}</th><td colspan="3">{3}</td></tr>'.format(
+            parseUTF8(NemasEFMRequest05.car_companion),
+            parseUTF8(form.car_companion),
+            parseUTF8(NemasEFMRequest05.car_reason),
+            parseUTF8(form.car_reason),                
+        ))
+
+        innerHTMList.append('<tr><th scope="row" colspan="7">{0}</th></tr>'.format(
+            parseUTF8(NemasEFMRequest05.title_car_go_plan),                
+        ))                
+
+        innerHTMList.append('<tr><th scope="row">{0}</th><td colspan="2">{1}</td><th>{2}</th><td>{3}</td><th>{4}</th><td>{5}</td></tr>'.format(
+            parseUTF8(NemasEFMRequest05.car_place),
+            parseUTF8(form.car_place),
+            parseUTF8(NemasEFMRequest05.car_go_time_plan),
+            parseUTF8(form.car_go_time_plan),
+            parseUTF8(NemasEFMRequest05.car_back_time_plan),
+            parseUTF8(form.car_back_time_plan),
+        ))
+
+
+        innerHTMList.append('<tr><th scope="row" colspan="7">{0}</th></tr>'.format(
+            parseUTF8(NemasEFMRequest05.title_car_go_real),                
+        ))                
+
+        innerHTMList.append('<tr><th scope="row">{0}</th><td colspan="2">{1}</td><th>{2}</th><td>{3}</td><th>{4}</th><td>{5}</td></tr>'.format(
+            parseUTF8(NemasEFMRequest05.car_go_time_real),
+            parseUTF8(form.car_go_time_real),
+            parseUTF8(NemasEFMRequest05.car_back_time_plan),
+            parseUTF8(form.car_back_time_plan),
+            parseUTF8(NemasEFMRequest05.car_mile),
+            parseUTF8(form.car_mile),
+        ))
+
+    elif kwargs['pk'] == NemasEFMRequest06.EFMID:
+
+        username = form.creator.last_name+form.creator.first_name
+        innerHTMList.append('<tr><th>{0}</th><td colspan="3">{1}</td><th>{2}</th><td>{3}</td></tr>'.format(
+                parseUTF8( NemasEFMRequest06.creator), 
+                parseUTF8(username), 
+                parseUTF8(NemasEFMRequest06.project_code), 
+                parseUTF8(form.project_code)
+        ))
+
+        innerHTMList.append('<tr><th>{0}</th><td>{1}</td><th>{2}</th><td colspan="3">{3}</td></tr>'.format(
+                parseUTF8( NemasEFMRequest06.department), 
+                parseUTF8(form.department), 
+                parseUTF8(NemasEFMRequest06.creation_date), 
+                parseUTF8(GetLocalTime(form.creation_date))
+        ))
+        innerHTMList.append('<tr><th colspan="4">{0}</th><th>{1}</th><th>{2}</th></tr>'.format(
+                parseUTF8( NemasEFMRequest06.proof_description), 
+                parseUTF8( NemasEFMRequest06.proof_cost), 
+                parseUTF8( NemasEFMRequest06.proof_file),                                         
+        ))
+
+        proofs = get_proofs_detail_by_pk(kwargs['pk'], form)
+
+        for proof in proofs:
+            innerHTMList.append('<tr><td colspan="4">{0}</td><td>{1}</td><td><a href="{2}">{3}</a></td></tr>'.format(
+                parseUTF8( proof.description), 
+                parseUTF8( proof.cost), 
+                parseUTF8( proof.proof.url),                                   
+                parseUTF8( ''.join([[proof.proof.original_filename if len(proof.proof.original_filename)<10 else proof.proof.original_filename[:10]][0], '...'])),  
+            ))
+
+    return innerHTMList
+
 class ViewBasicEFormActivity(LoginRequiredMixin, generic.DetailView):
 
     #Generic view to initiate activity
@@ -347,89 +473,10 @@ class ViewBasicEFormActivity(LoginRequiredMixin, generic.DetailView):
         #GET request handler for Create operation
         print "({0}.{1}) {2}, {3}, {4}".format(type(self).__name__, ViewBasicEFormActivity.get.__name__, request.path, args, kwargs)                
 
-        form = get_erequest_detail_by_pk(kwargs['pk'], kwargs['tk'])
+        form = get_erequest_detail_by_pk(kwargs['pk'], kwargs['tk'])   
+
         innerHTMList = [ '<table class="table">' ]
-        if kwargs['pk'] == NemasEFMRequest03.EFMID:
-            innerHTMList.append('<tr><th scope="row" rowspan="3">{0}</th><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td></tr>'.format(
-                parseUTF8(NemasEFMRequest03.creator),
-                "姓名",
-                parseUTF8(form.creator.last_name),
-                parseUTF8(NemasEFMRequest03.creation_date),
-                parseUTF8(GetLocalTime(form.creation_date))
-            ))
-
-            innerHTMList.append('<tr><th scope="row">{0}</th><td>{1}</td><td>{2}</td><td>{3}</td></tr>'.format(
-                parseUTF8(NemasEFMRequest03.department),
-                parseUTF8(form.department),
-                parseUTF8(NemasEFMRequest03.adv_paydate),            
-                ["" if form.adv_paydate in [None, ""] else GetLocalDate(form.adv_paydate) ][0]
-            ))
-
-            innerHTMList.append('<tr><td>{0}</td><td colspan="3">{1}</td></tr>'.format(
-                parseUTF8(NemasEFMRequest03.project_code),
-                parseUTF8(form.project_code),
-            ))                
-
-            innerHTMList.append('<tr><th scope="row" rowspan="3">{0}</th><td>{1}</td><td colspan="3">{2}</td></tr>'.format(
-                "收款人/單位",
-                parseUTF8(NemasEFMRequest03.receiver_name),
-                parseUTF8(form.receiver_name),
-            ))
-
-            innerHTMList.append('<tr><td>{0}</td><td colspan="3">{1}</td></tr>'.format(
-                parseUTF8(NemasEFMRequest03.receiver_account),
-                parseUTF8(form.receiver_account),
-            ))                     
-
-            innerHTMList.append('<tr><td>{0}</td><td colspan="3">{1}</td></tr>'.format(
-                parseUTF8(NemasEFMRequest03.receiver_bank),
-                parseUTF8(form.receiver_bank),
-            ))                     
-
-            innerHTMList.append('<tr><th scope="row">{0}</th><td colspan="4">{1}</td></tr>'.format(
-                parseUTF8(NemasEFMRequest03.adv_payment),
-                parseUTF8(form.adv_payment),
-            ))                     
-
-            innerHTMList.append('<tr><th scope="row">{0}</th><td colspan="2">{1}</td><th scope="row">{2}</th><td>{3}</td></tr>'.format(
-                parseUTF8(NemasEFMRequest03.purpose),
-                parseUTF8(PURPOSE_LIST[int(form.purpose)][1]),
-                parseUTF8(NemasEFMRequest03.method),
-                parseUTF8(PAYWAY_LIST[int(form.method)][1]),            
-            ))
-        elif kwargs['pk'] == NemasEFMRequest06.EFMID:
-
-            username = form.creator.last_name+form.creator.first_name
-            innerHTMList.append('<tr><th>{0}</th><td colspan="3">{1}</td><th>{2}</th><td>{3}</td></tr>'.format(
-                    parseUTF8( NemasEFMRequest06.creator), 
-                    parseUTF8(username), 
-                    parseUTF8(NemasEFMRequest06.project_code), 
-                    parseUTF8(form.project_code)
-            ))
-
-            innerHTMList.append('<tr><th>{0}</th><td>{1}</td><th>{2}</th><td colspan="3">{3}</td></tr>'.format(
-                    parseUTF8( NemasEFMRequest06.department), 
-                    parseUTF8(form.department), 
-                    parseUTF8(NemasEFMRequest06.creation_date), 
-                    parseUTF8(GetLocalTime(form.creation_date))
-            ))
-            innerHTMList.append('<tr><th colspan="4">{0}</th><th>{1}</th><th>{2}</th></tr>'.format(
-                    parseUTF8( NemasEFMRequest06.proof_description), 
-                    parseUTF8( NemasEFMRequest06.proof_cost), 
-                    parseUTF8( NemasEFMRequest06.proof_file),                                         
-            ))
-
-            proofs = get_proofs_detail_by_pk(kwargs['pk'], form)
-
-            for proof in proofs:
-                innerHTMList.append('<tr><td colspan="4">{0}</td><td>{1}</td><td><a href="{2}">{3}</a></td></tr>'.format(
-                    parseUTF8( proof.description), 
-                    parseUTF8( proof.cost), 
-                    parseUTF8( proof.proof.url),                                   
-                    parseUTF8( ''.join([[proof.proof.original_filename if len(proof.proof.original_filename)<10 else proof.proof.original_filename[:10]][0], '...'])),  
-                ))
-
-
+        addHTMLTableBody(innerHTMList, form, kwargs)
         innerHTMList.append('</table>')
         repl = "".join(innerHTMList)
         return HttpResponse(repl)
@@ -445,7 +492,8 @@ class ViewReviewEFormActivity(LoginRequiredMixin, generic.DetailView):
         form = get_erequest_detail_by_pk(kwargs['pk'], kwargs['tk'])
 
         innerHTMList = [ '<table class="table">' ]
-
+        addHTMLTableBody(innerHTMList, form, kwargs)
+        """
         if kwargs['pk'] == NemasEFMRequest03.EFMID:
 
             innerHTMList.append('<tr><th scope="row" rowspan="3">{0}</th><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td></tr>'.format(
@@ -526,7 +574,7 @@ class ViewReviewEFormActivity(LoginRequiredMixin, generic.DetailView):
                     parseUTF8( proof.proof.url),                                   
                     parseUTF8( ''.join([[proof.proof.original_filename if len(proof.proof.original_filename)<10 else proof.proof.original_filename[:10]][0], '...'])),  
                 ))
-
+        """
 
         td_class=["", "bg-success", "bg-danger"]
         innerHTMList.append('<tr class="{2}"><th scope="row">{0}</th><td colspan="5">{1}</td></tr>'.format(
@@ -647,7 +695,7 @@ class ApproveEFormActivity(LoginRequiredMixin, generic.View):
                     'creator': _get_username_cn(form.creator.username),
                     'creation_date': GetLocalTime(form.creation_date), #form.creation_date + timedelta(hours=8),                    
                     'man': username,
-                    'opt': [STATE_LIST[int(opt)] if request.user.username == NemasPU.accounting else ACT_LIST[int(opt)]][0][1],
+                    'opt': [STATE_LIST[int(opt)] if request.user.username == NemasPU.accounting.name else ACT_LIST[int(opt)]][0][1],
                     'comment': comment,
                     'approve_date': GetLocalTime(t),
             }]

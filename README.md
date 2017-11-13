@@ -3,8 +3,11 @@
 
 Simple Approval check system (Complex Chinese)
 
+<img width="50%" height="50%" src="https://user-images.githubusercontent.com/1155657/32724653-207972c6-c8ad-11e7-979c-139d873ad576.png" />
+
 
 My first try to implement a simple and easy-to-use approval checker system with django MVC framework and bootstrap in 3 weeks after work. Most of my codes is written and referred from [ActivFlow](https://github.com/faxad/ActivFlow) and slight change for bussiness reasons. 
+
 
 
 Installation guide:
@@ -17,6 +20,11 @@ Installation guide:
 4. Make a copy of this 
 5. run it
 > python manage.py runserver [MY_IP:MY_PORT]
+
+## ■ Update 2017/11/13
+1. add new request car_need form
+2. onClick isn't working on touch panel: append 'touchstart' (solved)[https://stackoverflow.com/questions/22015908/onclick-not-working-on-mobile-touch]
+
 
 
 ## ■ Update 2017/11/06

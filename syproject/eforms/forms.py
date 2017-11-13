@@ -4,7 +4,7 @@ from django import forms
 
 from .models import (
 	EFMRequest03, EReview, 
-	EFMRequest06,
+	EFMRequest05, EFMRequest06,
 	get_erequest_detail_by_pk)
 
 from constants import *
@@ -62,7 +62,6 @@ class TestForm_EFMRequest03(forms.ModelForm):
 			'creator', 'review', 'creation_date', 'last_updated'
 		]
 		widgets = {
-
             #'creator': forms.TextInput(attrs={"type":"hidden"}),
             #'review': forms.TextInput(attrs={"type":"hidden"}),
             #'creation_date': forms.TextInput(attrs={"type":"hidden"}),
@@ -84,6 +83,82 @@ class TestForm_EFMRequest03(forms.ModelForm):
 
             'purpose': forms.Select(attrs={'class': "form-control"}),           
             'method': forms.Select(attrs={'class': "form-control"}),           
+		}
+
+class TestForm_EFMRequest05(forms.ModelForm):
+	
+	project_code = forms.CharField(error_messages={'required':
+		u'{0} 欄不得為空'.format(unicode(EFMRequest03._meta.get_field('project_code').verbose_name))}, 
+		widget=forms.TextInput(attrs={'class': "form-control"}), 
+		label=unicode(EFMRequest03._meta.get_field('project_code').verbose_name))
+
+	department = forms.CharField(error_messages={'required':
+		u'{0} 欄不得為空'.format(unicode(EFMRequest03._meta.get_field('department').verbose_name))}, 	 
+		widget=forms.TextInput(attrs={'class': "form-control"}), 
+		label=unicode(EFMRequest03._meta.get_field('department').verbose_name))
+
+	car_plate = forms.CharField(error_messages={'required': 
+		u'{0} 欄不得為空'.format(NemasEFMRequest05.car_plate )}, 	 
+		widget=forms.TextInput(attrs={'class': "form-control"}), 
+		label=unicode(NemasEFMRequest05.car_plate))
+
+	car_companion = forms.CharField(error_messages={'required': 
+		u'{0} 欄不得為空'.format(NemasEFMRequest05.car_companion )}, 	 
+		widget=forms.TextInput(attrs={'class': "form-control"}), 
+		label=unicode(NemasEFMRequest05.car_companion))
+
+	car_reason = forms.CharField(error_messages={'required': 
+		u'{0} 欄不得為空'.format(NemasEFMRequest05.car_reason )}, 	 
+		widget=forms.TextInput(attrs={'class': "form-control"}), 
+		label=unicode(NemasEFMRequest05.car_reason))
+
+	car_place = forms.CharField(error_messages={'required': 
+		u'{0} 欄不得為空'.format(NemasEFMRequest05.car_place )}, 	 
+		widget=forms.TextInput(attrs={'class': "form-control"}), 
+		label=unicode(NemasEFMRequest05.car_place))
+
+	car_mile = forms.CharField(error_messages={'required': 
+		u'{0} 欄不得為空'.format(NemasEFMRequest05.car_mile )}, 	 
+		widget=forms.TextInput(attrs={'class': "form-control"}), 
+		label=unicode(NemasEFMRequest05.car_mile))
+	
+	car_go_time_plan = forms.CharField(error_messages={'required': 
+		u'{0} 欄不得為空'.format(NemasEFMRequest05.car_go_time_plan )}, 	 
+		widget=forms.DateInput(attrs={'class': "form-control", 'placeholder': "YYYY-MM-DD HH:mm"}), 		
+		label=unicode(NemasEFMRequest05.car_go_time_plan))
+
+	car_back_time_plan = forms.CharField(error_messages={'required': 
+		u'{0} 欄不得為空'.format(NemasEFMRequest05.car_back_time_plan )},
+		widget=forms.DateInput(attrs={'class': "form-control", 'placeholder': "YYYY-MM-DD HH:mm"}), 		
+		label=unicode(NemasEFMRequest05.car_back_time_plan))
+
+	car_go_time_real = forms.CharField(error_messages={'required': 
+		u'{0} 欄不得為空'.format(NemasEFMRequest05.car_go_time_real )}, 	 
+		widget=forms.DateInput(attrs={'class': "form-control", 'placeholder': "YYYY-MM-DD HH:mm"}), 		
+		label=unicode(NemasEFMRequest05.car_go_time_real))
+
+	car_back_time_real = forms.CharField(error_messages={'required': 
+		u'{0} 欄不得為空'.format(NemasEFMRequest05.car_back_time_real )}, 	 
+		widget=forms.DateInput(attrs={'class': "form-control", 'placeholder': "YYYY-MM-DD HH:mm"}), 		
+		label=unicode(NemasEFMRequest05.car_back_time_real))
+
+	class Meta:
+		model = EFMRequest05
+		field_args = {
+            "first_name" : {
+                "error_messages" : {
+                    "required" : "此欄不得為空!"
+                }
+            }
+        }
+
+		#fields = ('title', 'description',)
+		fields = '__all__'
+		exclude = [
+			'title', 'description',
+			'creator', 'review', 'creation_date', 'last_updated'
+		]
+		widgets = {
 		}
 
 
@@ -185,6 +260,24 @@ def get_form_by_efmid(efmid, tk = None, post_data = None):
 		return TestForm_EFMRequest03(
 			post_data or None, 
 			instance = [None if tk is None else get_erequest_detail_by_pk(efmid, tk)][0])
+
+	elif efmid == NemasEFMRequest05.EFMID:
+		"""
+		if tk is None:
+			if post_data is None:
+				return TestForm_EFMRequest03()
+			else:
+				return TestForm_EFMRequest03(post_data)
+		else:
+			if post_data is None:
+				return TestForm_EFMRequest03(instance=get_erequest_detail_by_pk(efmid, tk))
+			else:
+				return TestForm_EFMRequest03(post_data, instance=get_erequest_detail_by_pk(efmid, tk))
+		"""
+		return TestForm_EFMRequest05(
+			post_data or None, 
+			instance = [None if tk is None else get_erequest_detail_by_pk(efmid, tk)][0])
+
 
 	elif efmid == NemasEFMRequest06.EFMID:
 		return TestForm_EFMRequest06(

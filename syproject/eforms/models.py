@@ -137,6 +137,45 @@ class EFMRequest06(models.Model):
         return self.id
 
 
+class EFMRequest05(models.Model):
+
+    title = models.TextField(u'标题',max_length=30)
+    description = models.TextField(u'描述')
+
+    project_code = models.TextField(u'工代', max_length=50)
+    department   = models.TextField(u'部門', max_length=50)
+
+    creator = models.ForeignKey(User, verbose_name=u'创建者')    
+    review = models.ForeignKey('EReview', verbose_name=u'審查')
+    creation_date = models.DateTimeField(u'創建日期', auto_now_add=True)
+    last_updated  = models.DateTimeField(u'上次更新', auto_now=True) 
+
+
+    car_plate = models.TextField(NemasEFMRequest05.car_plate,max_length=30)
+    car_companion = models.TextField(NemasEFMRequest05.car_companion,max_length=50)
+    car_reason = models.TextField(NemasEFMRequest05.car_reason,max_length=50)
+
+    car_place = models.TextField(NemasEFMRequest05.car_place,max_length=50)
+
+
+    car_go_time_plan  = models.DateTimeField(NemasEFMRequest05.car_go_time_plan) 
+    car_back_time_plan  = models.DateTimeField(NemasEFMRequest05.car_back_time_plan) 
+    car_go_time_real  = models.DateTimeField(NemasEFMRequest05.car_go_time_real) 
+    car_back_time_real  = models.DateTimeField(NemasEFMRequest05.car_back_time_real)
+
+    car_mile = models.TextField(NemasEFMRequest05.car_mile, max_length=30)
+
+
+    class Meta:
+        verbose_name = NemasEFMRequest05.EFMName
+        verbose_name_plural = verbose_name
+        ordering = ['id']
+
+
+    def __unicode__(self):
+        return self.id
+
+
 class EReview(models.Model):
 
     title = models.TextField(u'标题',blank=True, null=True,max_length=30)
@@ -206,6 +245,31 @@ def init_erequest_by_efmid(efmid, fo, creator, http_request=None):
         )
         f.save()
         return f
+    if efmid == NemasEFMRequest05.EFMID:
+        r = EReview(status='1')
+        r.save()
+        f= EFMRequest05(
+            project_code=fo.cleaned_data['project_code'],
+            department=fo.cleaned_data['department'],
+
+            car_plate=fo.cleaned_data['car_plate'],
+            car_companion=fo.cleaned_data['car_companion'],
+            car_reason=fo.cleaned_data['car_reason'],
+            car_place=fo.cleaned_data['car_place'],
+
+            car_go_time_plan=fo.cleaned_data['car_go_time_plan'],
+            car_back_time_plan=fo.cleaned_data['car_back_time_plan'],
+            car_go_time_real=fo.cleaned_data['car_go_time_real'],
+
+            car_back_time_real=fo.cleaned_data['car_back_time_real'],
+            car_mile=fo.cleaned_data['car_mile'],
+            
+            creator=creator,
+            review=r
+        )
+        f.save()
+        return f
+
     elif efmid == NemasEFMRequest06.EFMID:
 
         #print http_request.POST.keys()
@@ -284,6 +348,8 @@ def update_erequest_review_by_efmid(efmid, pid, man, opt, comment):
 
     if efmid == NemasEFMRequest03.EFMID:
         e = EFMRequest03.objects.get(id=pid)
+    if efmid == NemasEFMRequest05.EFMID:
+        e = EFMRequest05.objects.get(id=pid)        
     elif efmid == NemasEFMRequest06.EFMID:
         e = EFMRequest06.objects.get(id=pid)
 
@@ -357,6 +423,8 @@ def get_erequest_detail_by_pk(efmid, pid):
     requestObj = None
     if efmid == NemasEFMRequest03.EFMID:
         requestObj = EFMRequest03
+    elif efmid == NemasEFMRequest05.EFMID:
+        requestObj = EFMRequest05
     elif efmid == NemasEFMRequest06.EFMID:
         requestObj = EFMRequest06
 
@@ -365,26 +433,39 @@ def get_erequest_detail_by_pk(efmid, pid):
 
 def get_erequests_by_efmid(efmid=''):
 
+    efm = None
     if efmid == NemasEFMRequest03.EFMID:
-        return  EFMRequest03.objects.all()
+        efm = EFMRequest03
+
+    elif efmid == NemasEFMRequest05.EFMID:
+        efm = EFMRequest05
 
     elif efmid == NemasEFMRequest06.EFMID:
-        return EFMRequest06.objects.all()
+        efm = EFMRequest06
 
     else:
-        return ERequest.objects.all()
+        efm = ERequest
+
+    return efm.objects.all()
 
 
 def get_erequests_by_creator(efmid='', creator=''):
 
+    efm = None
+
     if efmid == NemasEFMRequest03.EFMID:
-        return EFMRequest03.objects.filter(creator=creator)
+        efm = EFMRequest03
+
+    elif efmid == NemasEFMRequest05.EFMID:
+        efm = EFMRequest05
 
     elif efmid == NemasEFMRequest06.EFMID:
-        return EFMRequest06.objects.filter(creator=creator)
+        efm = EFMRequest06
 
     else:
-        return ERequest.objects.all()    
+        efm = ERequest 
+
+    return efm.objects.filter(creator=creator)
 
 def get_proofs_detail_by_pk(efmid, fo):
 

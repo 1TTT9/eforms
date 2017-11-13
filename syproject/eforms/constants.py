@@ -1,30 +1,8 @@
 #-*- coding:utf-8 -*-
 
-"""
-REQUEST_IDENTIFIER = 'Initial'
 
-REQUEST_STATUS = (
-    ('Initiated', 'Initiated'),
-    ('Withdrawn', 'Withdrawn'),
-    ('Completed', 'Completed')
-)
-
-TASK_STATUS = (
-    ('Not Started', 'Not Started'),
-    ('In Progress', 'In Progress'),
-    ('Rolled Back', 'Rolled Back'),
-    ('Completed', 'Completed')
-)
-# register workflow apps here
-# enable 'tests' app only for manual testing purpose
-
-WORKFLOW_APPS = [
-    'tests'
-]
-"""
 
 SYSTEM_TITLE = u'簽核系統'
-
 
 
 STATE_LIST = (
@@ -54,17 +32,7 @@ PAYWAY_LIST = (
     ('2', '支票'),
 )
 
-"""
-PRIVILUSER = (
-    {'pri':10, 'name':'accounting', 'name_title':u'會計', 'block_num': 0},
 
-    {'pri':20, 'name':'supervisor', 'name_title': u'主管', 'block_num': 1}, #0
-    {'pri':30, 'name':'ma', 'name_title': u'特助', 'block_num': 2},
-    {'pri':40, 'name':'manager', 'name_title': u'總經理', 'block_num': 3},
-    {'pri':50, 'name':'vp', 'name_title':u'董事', 'block_num': 4},
-    {'pri':99, 'name':'admin', 'name_title':u'管理者', 'block_num': 0},     #5
-)
-"""
 class Man(object):
     def __init__(self, n, t, p, block_num):
         self.name = n
@@ -88,8 +56,6 @@ class Acts:
     waiting = 0
     approved = 1
     rejected = 2
-
-
 
 
 
@@ -162,14 +128,46 @@ class NemasEFMRequest03:
     unknown_04 = u'歸還金額'
 
 
+class NemasEFMRequest05:
+
+    EFMID = '5'
+    EFMName = u'派車申請單'
+
+    title =  u'标题' 
+    description =  u'描述'   
+
+    project_code =  u'工代'
+    department   = u'部門'
+    creator = u'创建者'
+    review = u'審查'
+    creation_date = u'創建日期'
+    last_updated  = u'上次更新'
+
+    car_plate = u'車牌號'
+    car_companion = u'用車人員'
+    car_reason = u'用車事由'
+
+    car_place =  u'辦事地點'
+    car_go_time_plan =  u'出車時間'
+    car_back_time_plan =  u'返回時間'
+
+    car_go_time_real =  u'出車時間'
+    car_back_time_real =  u'返回時間'
+
+    car_mile = u'行駛里程'
+
+    title_car_go_plan = u'計劃用車情形'
+    title_car_go_real = u'實際出車情況'
+
+
 FORM_LIST = (
 #    ('0', '派工申請單'),
 #    ('1', '採購申請單'),
-#    ('2', '出差申請單'),
     (NemasEFMRequest03.EFMID, NemasEFMRequest03.EFMName),
 #    ('4', '派車申請單'),
-#    ('5', '簽呈申請單'),
+    (NemasEFMRequest05.EFMID, NemasEFMRequest05.EFMName),
     (NemasEFMRequest06.EFMID, NemasEFMRequest06.EFMName),
-#    ('7', '加班申請單'),
-#    ('8', '請假申請單'),
+#    ('7', '簽呈申請單'),
+#    ('8', '加班申請單'),
+#    ('9', '請假申請單'),
 )
